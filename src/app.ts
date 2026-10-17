@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import authRouter from "./routes/auth";
 import coursesRouter from "./routes/courses";
 import submissionsRouter from "./routes/submissions";
+import aiRouter from "./routes/ai";
 import { connectDB } from "./config/db";
 
 export const app = express();
@@ -35,6 +36,8 @@ app.get("/api/health", (_req: Request, res: Response) => {
 app.use("/api/auth", authRouter);
 app.use("/api/courses", coursesRouter);
 app.use("/api/submissions", submissionsRouter);
+// Private, rate limited, and the only route that talks to Gemini.
+app.use("/api/ai", aiRouter);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ message: `No route for ${req.method} ${req.originalUrl}` });
