@@ -1,5 +1,7 @@
 # itelect4-backend
 
+[![CI](https://github.com/nariokeith/itelect4-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/nariokeith/itelect4-backend/actions/workflows/ci.yml)
+
 The Express + MongoDB API for
 [itelect4-project](https://github.com/nariokeith/itelect4-project). Both are deployed on
 Vercel:
@@ -11,6 +13,19 @@ Vercel:
 
 Health check: https://itelect4-backend-zeta.vercel.app/api/health answers
 `{"ok":true,"db":true}` once the API has reached MongoDB Atlas.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  fe["itelect4-project<br/>React + Vite on Vercel"]
+  be["itelect4-backend<br/>Express on Vercel"]
+  db[("MongoDB Atlas")]
+  ai["Gemini API"]
+  fe -- "fetch + Bearer token" --> be
+  be -- "Mongoose" --> db
+  be -- "GEMINI_API_KEY" --> ai
+```
 
 ## Routes
 
@@ -54,7 +69,27 @@ npm run seed     # puts the three courses in the database; safe to run twice
 npm run try-ai   # one real Gemini request from the terminal; needs GEMINI_API_KEY
 npm run dev      # API on http://localhost:4000
 npm run build    # type-check and compile with tsc
+npm test         # the Supertest file; needs JWT_SECRET, not the database or Gemini
 ```
+
+## Tests and CI (GT6)
+
+`tests/ai.test.ts` sends real requests to the real app from `src/app.ts` with Supertest —
+no port is opened. It covers the one JWT-protected route that calls Gemini, `POST /api/ai`:
+
+| Test | Expects |
+|---|---|
+| no `Authorization` header | 401 `No token. Send Authorization: Bearer <token>` |
+| a token signed with another secret | 401 `Token is invalid or has expired` |
+| a valid token, prompt `"Too short"` | 400 with the schema's 20-character message |
+
+`vi.mock` replaces `src/config/db` with a `connectDB` that does nothing, so no database is
+needed, and the valid-token test stops at the request schema, so Gemini is never called.
+Only that test signs a token, so only it needs `JWT_SECRET`.
+
+`.github/workflows/ci.yml` runs `npm ci`, `npm run typecheck` and `npm test` on every push.
+`.env` is never pushed, so `JWT_SECRET` comes from the repository secret of the same name
+(Settings → Secrets and variables → Actions).
 
 ## AI review (GT5)
 
