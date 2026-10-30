@@ -106,7 +106,8 @@ from Gemini: `summary`, `strengths` (1–3), `improvements` (1–3) and `readine
   minute per account (keyed on `req.userId`), then checks the body before calling Gemini.
   Gemini's quota error becomes 429; any other Gemini failure, or a reply that fails the
   schema, becomes 502. Gemini's own error text is logged, never sent to the browser.
-- The model is `gemini-flash-latest`, an alias Google moves to its current Flash model.
+- The model is `gemini-flash-lite-latest`, an alias Google moves to its current Flash-Lite
+  model. It answers in about 2 seconds; `gemini-flash-latest` took 36–75 seconds in testing.
 
 ## Deployment
 
