@@ -12,8 +12,6 @@ const NOT_FOUND = { message: "Submission not found" };
 
 const router = Router();
 
-// Every route below needs a token, and every query is scoped to its owner,
-// so one student can never read or change another's rows.
 router.use(requireAuth);
 
 router.get("/", async (req: Request, res: Response) => {
@@ -31,8 +29,6 @@ router.get("/:id", async (req: Request<IdParams>, res: Response) => {
 });
 
 router.post("/", async (req: Request<unknown, unknown, NewSubmissionBody>, res: Response) => {
-  // Only the two fields the client is allowed to set. The owner comes from
-  // the token, and submittedAt from the schema default.
   const { courseCode, repoUrl } = req.body;
   const submission = await Submission.create({ courseCode, repoUrl, studentId: req.userId });
   res.status(201).json(submission);

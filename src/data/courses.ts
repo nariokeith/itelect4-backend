@@ -1,8 +1,5 @@
 import type { CourseDoc } from "../types/index";
 
-// The three courses itelect4-project's db.json held, word for word. They are
-// reference data: nobody creates a course through the API, so they live here
-// and go into the database once, from src/seed.ts.
 export const COURSES: CourseDoc[] = [
   {
     code: "ITELECT4",

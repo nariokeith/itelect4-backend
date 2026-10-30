@@ -1,23 +1,12 @@
-// One file, one JWT-protected route: POST /api/ai. Supertest sends real HTTP
-// requests to the real Express app from src/app.ts, without opening a port.
 import { describe, it, expect, vi } from "vitest";
 import request from "supertest";
 import jwt from "jsonwebtoken";
 import { app } from "../src/app";
 
-// app.ts awaits connectDB() in front of every route, and there is no database
-// here or on GitHub's machine. This swaps the whole src/config/db module, for
-// this file only, for one whose connectDB does nothing. Vitest hoists vi.mock
-// above the imports, so app.ts gets this version even though it is imported
-// first. Everything else -- cors, express.json, requireAuth, the limiter, the
-// schema -- is the real code.
 vi.mock("../src/config/db", () => ({
   connectDB: async () => {},
 }));
 
-// A token made the way POST /api/auth/login makes one: the same payload
-// shape, signed with the same JWT_SECRET. No user has to exist, because
-// requireAuth only checks the signature.
 function tokenFor(userId: string): string {
   return jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: "5m" });
 }
@@ -47,8 +36,6 @@ describe("POST /api/ai", () => {
   });
 
   it("lets a valid token through, then checks the body", async () => {
-    // "Too short" is 9 characters, so aiRequestSchema refuses it before
-    // reviewProject() runs -- Gemini is never called and no quota is spent.
     const res = await request(app)
       .post("/api/ai")
       .set("Authorization", `Bearer ${tokenFor("test-user")}`)

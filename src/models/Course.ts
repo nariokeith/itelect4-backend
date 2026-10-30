@@ -6,8 +6,6 @@ const courseSchema = new Schema<CourseDoc>(
     code: {
       type: String,
       required: [true, "Course code is required"],
-      // unique is why GET /api/courses/:code can use findOne and be sure
-      // nothing else matched.
       unique: true,
       trim: true,
       uppercase: true,
@@ -32,8 +30,6 @@ const courseSchema = new Schema<CourseDoc>(
   },
   {
     toJSON: {
-      // Course has no id of its own -- the code is its identity -- so the
-      // two fields Mongo added are the only ones to take out.
       transform(_doc, ret: Record<string, unknown>) {
         delete ret._id;
         delete ret.__v;
